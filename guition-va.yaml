@@ -48,6 +48,7 @@ esphome:
         - lambda: |-
             // core settings entries: label + the g_mode each opens. Packages add their own.
             id(g_set_labels) += "Display";    id(g_set_items)[id(g_set_n)++] = 11;
+            id(g_set_labels) += "\nHome";       id(g_set_items)[id(g_set_n)++] = 12;
             id(g_set_labels) += "\nRing";      id(g_set_items)[id(g_set_n)++] = 16;
             id(g_set_labels) += "\nAssistant"; id(g_set_items)[id(g_set_n)++] = 13;
             id(g_set_labels) += "\nSystem";    id(g_set_items)[id(g_set_n)++] = 15;
@@ -749,6 +750,7 @@ script:
             - lvgl.widget.hide: gry_roller
             - lvgl.widget.hide: sys_roller
             - lvgl.widget.hide: ring_roller
+            - lvgl.widget.hide: home_roller
           else:
             - lvgl.widget.show: ui_dim
             - lvgl.widget.show: ui_head_bg
@@ -792,23 +794,24 @@ script:
                       else:
                         - lvgl.widget.hide: disp_lbl
                         - if:
-                            condition: { lambda: 'int i=id(g_disp_idx); return i==1 || i==5 || i==6;' }
+                            condition: { lambda: 'return id(g_disp_idx) == 1;' }
                             then:
                               - lvgl.widget.show: disp_switch
-                              - lvgl.widget.update:
-                                  id: disp_switch
-                                  state:
-                                    checked: !lambda |-
-                                      int i = id(g_disp_idx);
-                                      if (i == 1) return id(g_night);
-                                      if (i == 5) return id(g_show_weather);
-                                      return id(g_show_climate);
+                              - lvgl.widget.update: { id: disp_switch, state: { checked: !lambda 'return id(g_night);' } }
                             else:
                               - lvgl.widget.hide: disp_switch
                 else:
                   - lvgl.widget.hide: disp_roller
                   - lvgl.widget.hide: disp_lbl
                   - lvgl.widget.hide: disp_switch
+            - if:   # Home (12): home-screen widget toggles (weather / climate)
+                condition: { lambda: 'return id(g_mode) == 12;' }
+                then:
+                  - lvgl.widget.show: home_roller
+                  - lvgl.roller.update: { id: home_roller, animated: true, selected_index: !lambda 'return id(g_sub_idx);' }
+                  - lvgl.widget.show: disp_switch
+                  - lvgl.widget.update: { id: disp_switch, state: { checked: !lambda 'return id(g_sub_idx) == 0 ? id(g_show_weather) : id(g_show_climate);' } }
+                else: [ lvgl.widget.hide: home_roller ]
             - if:   # Assistant (13): both items = toggles (0=wake word, 1=beep)
                 condition: { lambda: 'return id(g_mode) == 13;' }
                 then:
@@ -842,7 +845,7 @@ script:
                           return id(g_ring_vol_en);
                 else: [ lvgl.widget.hide: ring_roller ]
             - if:   # we hide ui_big in the list (5), info (7), wake word (8), Display (11)
-                condition: { lambda: 'return id(g_mode) == 5 || id(g_mode) == 7 || id(g_mode) == 9 || id(g_mode) == 11 || id(g_mode) == 13 || id(g_mode) == 14 || id(g_mode) == 15 || id(g_mode) == 16 || id(g_mode) == 21 || id(g_mode) == 22;' }
+                condition: { lambda: 'return id(g_mode) == 5 || id(g_mode) == 7 || id(g_mode) == 9 || id(g_mode) == 11 || id(g_mode) == 12 || id(g_mode) == 13 || id(g_mode) == 14 || id(g_mode) == 15 || id(g_mode) == 16 || id(g_mode) == 21 || id(g_mode) == 22;' }
                 then: [lvgl.widget.hide: ui_big]
                 else: [lvgl.widget.show: ui_big]
             - lvgl.label.update:
@@ -884,6 +887,7 @@ script:
                   if (m == 7) return std::string("INFO");
                   if (m == 9) return std::string("RESTART");
                   if (m == 11) return std::string("DISPLAY");
+                  if (m == 12) return std::string("HOME");
                   if (m == 13) return std::string("ASSISTANT");
                   if (m == 14) return std::string("GAMES");
                   if (m == 15) return std::string("SYSTEM");
@@ -1242,9 +1246,9 @@ binary_sensor:
                   lambda: 'return id(g_mode) == 5 || id(g_mode) == 11 || (id(g_mode) >= 12 && id(g_mode) <= 16);'
                 then:
                   - lambda: |-
-                      if (id(g_mode) == 11) { if (id(g_disp_idx) < 6) id(g_disp_idx)++; }
+                      if (id(g_mode) == 11) { if (id(g_disp_idx) < 4) id(g_disp_idx)++; }
                       else if (id(g_mode) == 5) { if (id(g_set_idx) < id(g_set_n) - 1) id(g_set_idx)++; }
-                      else { int mx = (id(g_mode) == 15) ? 3 : (id(g_mode) == 13) ? 1 : (id(g_mode) == 16) ? 3 : 0; if (id(g_sub_idx) < mx) id(g_sub_idx)++; }
+                      else { int mx = (id(g_mode) == 15) ? 3 : (id(g_mode) == 13) ? 1 : (id(g_mode) == 16) ? 3 : (id(g_mode) == 12) ? 1 : 0; if (id(g_sub_idx) < mx) id(g_sub_idx)++; }
                   - script.execute: ui_render
                 else:
                   - if:
@@ -1592,13 +1596,18 @@ touchscreen:
                 - if: { condition: { lambda: 'return id(g_disp_idx) == 2;' }, then: [ lambda: 'id(g_mode) = 25;', script.execute: ui_render ] }
                 - if: { condition: { lambda: 'return id(g_disp_idx) == 3;' }, then: [ lambda: 'id(g_mode) = 26;', script.execute: ui_render ] }
                 - if: { condition: { lambda: 'return id(g_disp_idx) == 4;' }, then: [ lambda: 'id(g_mode) = 24;', script.execute: ui_render ] }
-                - if: { condition: { lambda: 'return id(g_disp_idx) == 5;' }, then: [ lambda: 'id(g_show_weather) = !id(g_show_weather);', script.execute: disp_apply, script.execute: ui_render ] }
-                - if: { condition: { lambda: 'return id(g_disp_idx) == 6;' }, then: [ lambda: 'id(g_show_climate) = !id(g_show_climate);', script.execute: disp_apply, script.execute: ui_render ] }
           - if:   # back -> settings list
               condition: { lambda: 'return id(g_gesture) == 3 || id(g_gesture) == 1;' }
               then:
                 - lambda: 'id(g_mode) = 5;'
                 - script.execute: ui_render
+    # === HOME (12) === tap: 0=toggle weather widget, 1=toggle climate widget; right/hold=back
+    - if:
+        condition: { lambda: 'return id(g_mode0) == 12;' }
+        then:
+          - if: { condition: { lambda: 'return id(g_gesture) == 0 && id(g_sub_idx) == 0;' }, then: [ lambda: 'id(g_show_weather) = !id(g_show_weather);', script.execute: disp_apply, script.execute: ui_render ] }
+          - if: { condition: { lambda: 'return id(g_gesture) == 0 && id(g_sub_idx) == 1;' }, then: [ lambda: 'id(g_show_climate) = !id(g_show_climate);', script.execute: disp_apply, script.execute: ui_render ] }
+          - if: { condition: { lambda: 'return id(g_gesture) == 3 || id(g_gesture) == 1;' }, then: [ lambda: 'id(g_mode) = 5;', script.execute: ui_render ] }
     # === ASSISTANT (13) === tap: 0=toggle wake word, 1=toggle beep; right/hold=back
     - if:
         condition: { lambda: 'return id(g_mode0) == 13;' }
@@ -2373,8 +2382,6 @@ lvgl:
               - "Night from"
               - "Night to"
               - "Screen off"
-              - "Weather"
-              - "Climate"
             selected_index: 0
             hidden: true
         - label:   # only for "Brightness" (shows %); toggles use disp_switch
@@ -2390,6 +2397,27 @@ lvgl:
             align: CENTER
             y: 88
             clickable: false
+            hidden: true
+        - roller:
+            id: home_roller
+            align: CENTER
+            y: -14
+            width: 290
+            visible_row_count: 3
+            clickable: false
+            text_font: font_med
+            text_color: 0x466761
+            bg_opa: TRANSP
+            border_width: 0
+            selected:
+              text_color: 0xFFFFFF
+              bg_color: 0xFFB020
+              bg_opa: 30%
+              radius: 10
+            options:
+              - "Weather"
+              - "Climate"
+            selected_index: 0
             hidden: true
         - roller:
             id: asys_roller
