@@ -13,17 +13,9 @@ It started as "my kid needs a physical timer" and turned into a whole puck. 🙂
 
 ## Demo
 
-
-
-https://github.com/user-attachments/assets/33c2a708-5f8b-4bab-a165-285cbfd919d9
-
-
-
 <div align="center">
-  <video src="YOUR_VIDEO_URL" controls width="400"></video>
+  <video src="https://github.com/user-attachments/assets/33c2a708-5f8b-4bab-a165-285cbfd919d9" controls width="400"></video>
 </div>
-
-[Watch the demo video (full quality, with sound)](assets/demo.mp4)
 
 ## What it does
 
