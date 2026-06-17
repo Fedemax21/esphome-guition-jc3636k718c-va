@@ -6,8 +6,8 @@
 
 A full-featured **Home Assistant Voice Assistant** running on the **Guition
 JC3636K718C** - a 1.8" round 360×360 touch display with a rotary knob, speaker,
-microphone and an **addressable LED ring**, all driven by a single ESPHome YAML
-(no custom C firmware).
+microphone and an **addressable LED ring**. It's pure ESPHome (no custom C firmware):
+an always-on core plus optional screen packages you pick from one thin config.
 
 It started as "my kid needs a physical timer" and turned into a whole puck. 🙂
 
@@ -27,6 +27,8 @@ It started as "my kid needs a physical timer" and turned into a whole puck. 🙂
   pause/stop, and an alarm (sound + on-screen + LED) when it finishes.
 - **Device control** - a tiles screen toggling your lights/switches.
 - **Home screen** - clock, date, battery, weather + room temp/humidity.
+- **More screens** (all optional, knob-driven) - a weather forecast dial, a thermostat for
+  any `climate` entity, and a configurable multi-sensor glance.
 - **LED ring** - controllable from HA *and* reactive: assistant (comet/spinner/wave),
   timer countdown, alarm flash, volume bar - each reaction toggleable in Settings.
 - **Two built-in arcade games** (a lane racer and a vertical shooter) for the kid.
@@ -92,6 +94,7 @@ base/                      # pulled as a remote package at compile time (no need
     space-wars.yaml        #   "Space Wars" game
     weather.yaml           #   weather (today + 7-day radial dial)
     thermostat.yaml        #   thermostat (climate.* dial; knob sets target, tap on/off)
+    sensors.yaml           #   sensors glance (1-6 HA entities, knob cycles)
     demo.yaml              #   commented example screen
     weather.ha-helper.yaml #   HA template sensor that feeds the weather screen
 assets/                    # fetched from GitHub at compile time (no need to copy locally)
