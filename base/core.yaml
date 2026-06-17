@@ -87,7 +87,8 @@ esphome:
     - priority: 790
       then:
         - lambda: |-
-            // core settings entries: label + the g_mode each opens. Packages add their own.
+            // core settings list: label + the g_mode each opens. (Screen packages add their
+            // own entries under Widgets via the g_wgrp_* / g_wopt_* registry, not here.)
             id(g_set_labels) += "Display";    id(g_set_items)[id(g_set_n)++] = 11;
             id(g_set_labels) += "\nHome";       id(g_set_items)[id(g_set_n)++] = 12;
             id(g_set_labels) += "\nWidgets";    id(g_set_items)[id(g_set_n)++] = 17;
@@ -711,7 +712,7 @@ globals:
   - id: g_tile4_glyph
     type: std::string
     restore_value: no
-  - id: g_wgrp_labels    # Widgets submenu: group names (Demo/Games/Weather), built at boot
+  - id: g_wgrp_labels    # Widgets submenu: group names, appended by each screen package at boot
     type: std::string
     restore_value: no
   - id: g_wopt_n         # generic per-screen settings registry (filled by screen packages at boot)

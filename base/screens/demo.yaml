@@ -5,16 +5,17 @@
 #   * it registers itself in the carousel (g_present),
 #   * it shows its own LVGL page,
 #   * it reacts to a tap (toggles the background black <-> white, text inverts),
-#   * it reads two toggles that live in the CORE config (Settings -> Widgets):
+#   * it declares its OWN settings toggles (Settings -> Widgets -> Demo):
 #         g_demo_border  -> draw a border
 #         g_demo_led     -> drive the LED ring (green on white bg, red on black bg)
+#     The globals live in THIS file and are registered into the core's generic settings
+#     registry (g_wgrp_* / g_wopt_*) in on_boot - see how below as the template.
 #   * it drives the LED ring directly (a simple demo - it bypasses the ring
 #     reaction-priority system in the core; that is fine for an example).
 #
-# Anything a screen needs lives in THIS file (globals/scripts/interval/lvgl page),
-# except the shared toggles which are core globals so the Settings menu can reach
-# them even when this screen is not included. Remove the screen by dropping this
-# file from the package "files:" list - nothing else to edit.
+# Everything a screen needs lives in THIS file (globals/scripts/interval/lvgl page +
+# its settings registration). Remove the screen by dropping this file from the package
+# "files:" list - nothing else to edit, anywhere.
 # ============================================================================
 
 esphome:

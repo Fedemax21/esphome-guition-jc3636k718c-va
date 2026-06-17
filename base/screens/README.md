@@ -47,19 +47,22 @@ symbols. The glue is a few plain globals in the core:
   running, timer idle), it sets `g_knob_capture=true`; the core knob handler then just
   accumulates +/-1 into `g_knob_delta` instead of changing volume. The screen reads and
   zeroes `g_knob_delta` in its own tick. Core never names a game variable.
-- `g_scores_reset` (bool) - Settings "reset scores" / factory reset set this; each game
-  package clears its own score globals when it sees the flag. Core does not touch game
-  score arrays.
+- Per-screen **settings registry** (`g_wgrp_*` + `g_wopt_*`) - a screen declares its own
+  Settings -> Widgets group and options in `on_boot`: append a group name to
+  `g_wgrp_labels`, then append each option (label + kind 0=toggle / 1=action + a `bool*`
+  to its own global) to `g_wopt_*`. The core renders them generically (modes 30 options /
+  31 confirm). The option globals live in the screen package, not the core.
+- `g_factory_reset` (bool, persists a reboot) - Settings -> System -> Factory reset sets
+  it; each game package clears its own score globals when it sees the flag in its tick.
 
 So a screen package contributes: its `globals`, its `script`s, its game-tick `interval`,
-its `lvgl.pages` entry, one `on_boot` step to register its carousel id, and one nav
-handler. It reads/writes only the shared core globals above.
+its `lvgl.pages` entry, an `on_boot` step to register its carousel id (and any Settings
+group/options), and one nav handler. It reads/writes only the shared core globals above.
 
 ## Status
 
 - [x] core refactor: data-driven carousel (`g_order`), nav via `g_nav_req`, knob via
-      `g_knob_capture`/`g_knob_delta`. Score storage (`g_top`/`g_best`/`g_sw_top`/`g_sw_best`)
-      stays in the core so reset/factory work without the game screens.
+      `g_knob_capture`/`g_knob_delta`.
 - [x] extract Space Wars -> `base/screens/space-wars.yaml`
 - [x] extract Cool Cars -> `base/screens/cool-cars.yaml`
 - [x] extract Player -> `base/screens/player.yaml` (volume + overlay stay in core)
@@ -72,12 +75,12 @@ handler. It reads/writes only the shared core globals above.
       keeps only global brightness/night/screen-off
 - [x] carousel order via the `screen_order` substitution; screens register `g_present`,
       absent ones are skipped (clock kept as a safety fallback)
-- [x] dynamic settings registry: screens add their own entries (label + g_mode) at boot;
-      the shared "Games" entry (reset scores) is added once, only when a game is present.
-      The roller list is applied at boot with `lv_roller_set_options(id(roller)->obj, ...)`.
+- [x] self-contained screen settings: each screen declares its Widgets group + options
+      (toggles/actions) and owns the backing globals; the core renders them generically
+      (`g_wgrp_*` / `g_wopt_*`, modes 30/31). Game scores + reset live in the game packages.
 - [x] verified on device (compiles; screens toggle from `files:`, order from `screen_order`,
       settings list adapts)
-- [ ] consider merging `beta` -> `main` (do NOT until the user says; then update README/wiki)
+- [x] merged to `main` (stable); `beta` is the active dev branch
 
 ## Adding a new screen (recipe)
 
@@ -85,5 +88,8 @@ A screen package adds: its `globals` / `script`s / game-tick `interval` / `lvgl.
 entry; an `esphome.on_boot` step that sets `id(g_present)[<id>] = true`; a 50ms nav
 handler that shows its page when `g_nav_req && g_base == <id>`. To give it a carousel
 slot, add its name to the core `name -> id` map in the order builder and to `screen_order`.
-To add a settings entry, append a label + g_mode to `g_set_labels`/`g_set_items` in on_boot
-(guard it for shared entries).
+
+To add Settings, register a Widgets group + options in `on_boot` (see `demo.yaml` /
+`weather.yaml` as templates): claim `int g = id(g_wgrp_n)++;`, append the group name to
+`id(g_wgrp_labels)`, then for each option append to `g_wopt_*` (group `g`, a label, kind
+0=toggle / 1=action, and `&id(your_global)`). Declare those globals in your own file.

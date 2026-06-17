@@ -89,7 +89,7 @@ script:
           id: wx_p_temp
           text: !lambda |-
             int d = id(g_wx_day);
-            bool f = id(g_wx_fahrenheit);                 // unit toggle lives in the core (Settings -> Widgets)
+            bool f = id(g_wx_fahrenheit);                 // unit toggle declared in this file (Settings -> Widgets -> Weather)
             char u = f ? 'F' : 'C';
             if (d >= id(g_wx_n)) {
               if (id(g_wx_now) > -100) {
