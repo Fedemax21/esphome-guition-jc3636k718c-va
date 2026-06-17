@@ -129,10 +129,6 @@ esphome:
             id(g_tile2_glyph) = ic("${tile2_icon}");
             id(g_tile3_glyph) = ic("${tile3_icon}");
             id(g_tile4_glyph) = ic("${tile4_icon}");
-    - priority: 610
-      then:
-        - lambda: |-
-            // Widgets groups + options are registered by each screen package (g_wgrp_* / g_wopt_*).
     - priority: 595
       then:
         - lambda: 'id(g_set_labels) += "\nSystem"; id(g_set_items)[id(g_set_n)++] = 15;'   # always last
