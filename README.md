@@ -106,6 +106,7 @@ assets/                    # fetched from GitHub at compile time (no need to cop
   sounds/                  # wake.wav + alarm.wav
   sprites/cool-cars/       # "Cool Cars" game graphics
   sprites/space-wars/      # "Space Wars" game graphics
+  sprites/snake/           # "Snake" menu logo
 scripts/
   make_sounds.py           # (re)generate the wav sounds
   esplog.py                # stream device logs over the native API

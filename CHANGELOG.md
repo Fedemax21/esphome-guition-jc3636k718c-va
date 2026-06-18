@@ -6,11 +6,14 @@ All notable changes to this project are documented here. The format is based on
 ## [2.1.4] - 2026-06-18
 
 ### Added
-- **Snake screen** (optional). The classic on a 12x12 grid that fits the round display: turn the
-  knob to steer (a rotation is one quarter-turn, so you can never reverse into yourself), eat
-  apples to grow and score, and avoid the walls and your own tail. It speeds up as you score and
-  keeps a top-10 (with its own "Reset scores" under Settings -> Widgets -> Snake). Pick it in the
-  `files:` list and place it via `screen_order` like any other screen.
+- **Snake screen** (optional). The classic on a 24x24 grid that fits the round display: turn the
+  knob to steer (a rotation is one quarter-turn, so you can never reverse into yourself), eat fruit
+  to grow and score, and avoid the walls and your own tail. The food is one of 12 random fruit
+  sprites; a skull hazard blinks in and out every few seconds and ends the game if you eat it. It
+  speeds up as you score and keeps a top-10 (with its own "Reset scores" under Settings -> Widgets
+  -> Snake). Full-screen menu logo and a green UI palette to match; How-to uses the same
+  numbered-badge layout as the other games. Pick it in the `files:` list and place it via
+  `screen_order` like any other screen.
 
 ### Fixed
 - Clock could still show UTC (off by the timezone offset) after the device had been idle/asleep,
