@@ -43,10 +43,10 @@ globals:
     restore_value: no
     initial_value: '0'
   - id: g_sn_tx       # body trail dots X (ring buffer; centre coords px)
-    type: float[56]
+    type: float[100]
     restore_value: no
   - id: g_sn_ty
-    type: float[56]
+    type: float[100]
     restore_value: no
   - id: g_sn_head     # ring index of the newest dot
     type: int
@@ -181,9 +181,9 @@ script:
   - id: sn_drawfull
     then:
       - lambda: |-
-          lv_obj_t *SS[56] = { id(sn_seg0), id(sn_seg1), id(sn_seg2), id(sn_seg3), id(sn_seg4), id(sn_seg5), id(sn_seg6), id(sn_seg7), id(sn_seg8), id(sn_seg9), id(sn_seg10), id(sn_seg11), id(sn_seg12), id(sn_seg13), id(sn_seg14), id(sn_seg15), id(sn_seg16), id(sn_seg17), id(sn_seg18), id(sn_seg19), id(sn_seg20), id(sn_seg21), id(sn_seg22), id(sn_seg23), id(sn_seg24), id(sn_seg25), id(sn_seg26), id(sn_seg27), id(sn_seg28), id(sn_seg29), id(sn_seg30), id(sn_seg31), id(sn_seg32), id(sn_seg33), id(sn_seg34), id(sn_seg35), id(sn_seg36), id(sn_seg37), id(sn_seg38), id(sn_seg39), id(sn_seg40), id(sn_seg41), id(sn_seg42), id(sn_seg43), id(sn_seg44), id(sn_seg45), id(sn_seg46), id(sn_seg47), id(sn_seg48), id(sn_seg49), id(sn_seg50), id(sn_seg51), id(sn_seg52), id(sn_seg53), id(sn_seg54), id(sn_seg55) };
-          for (int k = 0; k < 56; k++) {
-            int d = (id(g_sn_head) - k + 224) % 56;
+          lv_obj_t *SS[100] = { id(sn_seg0), id(sn_seg1), id(sn_seg2), id(sn_seg3), id(sn_seg4), id(sn_seg5), id(sn_seg6), id(sn_seg7), id(sn_seg8), id(sn_seg9), id(sn_seg10), id(sn_seg11), id(sn_seg12), id(sn_seg13), id(sn_seg14), id(sn_seg15), id(sn_seg16), id(sn_seg17), id(sn_seg18), id(sn_seg19), id(sn_seg20), id(sn_seg21), id(sn_seg22), id(sn_seg23), id(sn_seg24), id(sn_seg25), id(sn_seg26), id(sn_seg27), id(sn_seg28), id(sn_seg29), id(sn_seg30), id(sn_seg31), id(sn_seg32), id(sn_seg33), id(sn_seg34), id(sn_seg35), id(sn_seg36), id(sn_seg37), id(sn_seg38), id(sn_seg39), id(sn_seg40), id(sn_seg41), id(sn_seg42), id(sn_seg43), id(sn_seg44), id(sn_seg45), id(sn_seg46), id(sn_seg47), id(sn_seg48), id(sn_seg49), id(sn_seg50), id(sn_seg51), id(sn_seg52), id(sn_seg53), id(sn_seg54), id(sn_seg55), id(sn_seg56), id(sn_seg57), id(sn_seg58), id(sn_seg59), id(sn_seg60), id(sn_seg61), id(sn_seg62), id(sn_seg63), id(sn_seg64), id(sn_seg65), id(sn_seg66), id(sn_seg67), id(sn_seg68), id(sn_seg69), id(sn_seg70), id(sn_seg71), id(sn_seg72), id(sn_seg73), id(sn_seg74), id(sn_seg75), id(sn_seg76), id(sn_seg77), id(sn_seg78), id(sn_seg79), id(sn_seg80), id(sn_seg81), id(sn_seg82), id(sn_seg83), id(sn_seg84), id(sn_seg85), id(sn_seg86), id(sn_seg87), id(sn_seg88), id(sn_seg89), id(sn_seg90), id(sn_seg91), id(sn_seg92), id(sn_seg93), id(sn_seg94), id(sn_seg95), id(sn_seg96), id(sn_seg97), id(sn_seg98), id(sn_seg99) };
+          for (int k = 0; k < 100; k++) {
+            int d = (id(g_sn_head) - k + 400) % 100;
             if (d < id(g_sn_len)) lv_obj_set_pos(SS[k], 180 + (int) lroundf(id(g_sn_tx)[k]) - 4, 180 + (int) lroundf(id(g_sn_ty)[k]) - 4);
             else lv_obj_set_pos(SS[k], 400, 400);
           }
@@ -193,8 +193,8 @@ script:
   - id: sn_clear
     then:
       - lambda: |-
-          lv_obj_t *SS[56] = { id(sn_seg0), id(sn_seg1), id(sn_seg2), id(sn_seg3), id(sn_seg4), id(sn_seg5), id(sn_seg6), id(sn_seg7), id(sn_seg8), id(sn_seg9), id(sn_seg10), id(sn_seg11), id(sn_seg12), id(sn_seg13), id(sn_seg14), id(sn_seg15), id(sn_seg16), id(sn_seg17), id(sn_seg18), id(sn_seg19), id(sn_seg20), id(sn_seg21), id(sn_seg22), id(sn_seg23), id(sn_seg24), id(sn_seg25), id(sn_seg26), id(sn_seg27), id(sn_seg28), id(sn_seg29), id(sn_seg30), id(sn_seg31), id(sn_seg32), id(sn_seg33), id(sn_seg34), id(sn_seg35), id(sn_seg36), id(sn_seg37), id(sn_seg38), id(sn_seg39), id(sn_seg40), id(sn_seg41), id(sn_seg42), id(sn_seg43), id(sn_seg44), id(sn_seg45), id(sn_seg46), id(sn_seg47), id(sn_seg48), id(sn_seg49), id(sn_seg50), id(sn_seg51), id(sn_seg52), id(sn_seg53), id(sn_seg54), id(sn_seg55) };
-          for (int k = 0; k < 56; k++) lv_obj_set_pos(SS[k], 400, 400);
+          lv_obj_t *SS[100] = { id(sn_seg0), id(sn_seg1), id(sn_seg2), id(sn_seg3), id(sn_seg4), id(sn_seg5), id(sn_seg6), id(sn_seg7), id(sn_seg8), id(sn_seg9), id(sn_seg10), id(sn_seg11), id(sn_seg12), id(sn_seg13), id(sn_seg14), id(sn_seg15), id(sn_seg16), id(sn_seg17), id(sn_seg18), id(sn_seg19), id(sn_seg20), id(sn_seg21), id(sn_seg22), id(sn_seg23), id(sn_seg24), id(sn_seg25), id(sn_seg26), id(sn_seg27), id(sn_seg28), id(sn_seg29), id(sn_seg30), id(sn_seg31), id(sn_seg32), id(sn_seg33), id(sn_seg34), id(sn_seg35), id(sn_seg36), id(sn_seg37), id(sn_seg38), id(sn_seg39), id(sn_seg40), id(sn_seg41), id(sn_seg42), id(sn_seg43), id(sn_seg44), id(sn_seg45), id(sn_seg46), id(sn_seg47), id(sn_seg48), id(sn_seg49), id(sn_seg50), id(sn_seg51), id(sn_seg52), id(sn_seg53), id(sn_seg54), id(sn_seg55), id(sn_seg56), id(sn_seg57), id(sn_seg58), id(sn_seg59), id(sn_seg60), id(sn_seg61), id(sn_seg62), id(sn_seg63), id(sn_seg64), id(sn_seg65), id(sn_seg66), id(sn_seg67), id(sn_seg68), id(sn_seg69), id(sn_seg70), id(sn_seg71), id(sn_seg72), id(sn_seg73), id(sn_seg74), id(sn_seg75), id(sn_seg76), id(sn_seg77), id(sn_seg78), id(sn_seg79), id(sn_seg80), id(sn_seg81), id(sn_seg82), id(sn_seg83), id(sn_seg84), id(sn_seg85), id(sn_seg86), id(sn_seg87), id(sn_seg88), id(sn_seg89), id(sn_seg90), id(sn_seg91), id(sn_seg92), id(sn_seg93), id(sn_seg94), id(sn_seg95), id(sn_seg96), id(sn_seg97), id(sn_seg98), id(sn_seg99) };
+          for (int k = 0; k < 100; k++) lv_obj_set_pos(SS[k], 400, 400);
           lv_obj_set_pos(id(sn_head), 400, 400);
       - lvgl.widget.hide: sn_fruit0
       - lvgl.widget.hide: sn_fruit1
@@ -207,7 +207,7 @@ script:
           id(g_sn_state) = 1; id(g_sn_score) = 0; id(g_sn_dead) = false;
           id(g_sn_ang) = -1.5708f; id(g_sn_grow) = 0;            // heading up
           id(g_sn_len) = 5; id(g_sn_head) = 4;
-          for (int i = 0; i < 56; i++) { id(g_sn_tx)[i] = 0.0f; id(g_sn_ty)[i] = 0.0f; }
+          for (int i = 0; i < 100; i++) { id(g_sn_tx)[i] = 0.0f; id(g_sn_ty)[i] = 0.0f; }
           for (int k = 0; k < 5; k++) { id(g_sn_tx)[k] = 0.0f; id(g_sn_ty)[k] = (4 - k) * 8.0f; }
           id(g_sn_hx) = 0.0f; id(g_sn_hy) = 0.0f;
           for (int s = 0; s < 3; s++) id(g_sn_fon)[s] = false;
@@ -357,7 +357,7 @@ interval:
                   id(g_sn_hx) = hx; id(g_sn_hy) = hy;
                   int len = id(g_sn_len), head = id(g_sn_head);
                   for (int i = 6; i < len; i++) {
-                    int sl = (head - i + 224) % 56;
+                    int sl = (head - i + 400) % 100;
                     float dx = hx - id(g_sn_tx)[sl], dy = hy - id(g_sn_ty)[sl];
                     if (dx*dx + dy*dy < 8.0f * 8.0f) { id(g_sn_dead) = true; break; }
                   }
@@ -372,11 +372,11 @@ interval:
                   if (!id(g_sn_dead)) {
                     float dx = hx - id(g_sn_tx)[head], dy = hy - id(g_sn_ty)[head];
                     if (dx*dx + dy*dy >= 8.0f * 8.0f) {
-                      int nh = (head + 1) % 56;
+                      int nh = (head + 1) % 100;
                       id(g_sn_tx)[nh] = hx; id(g_sn_ty)[nh] = hy;
                       id(g_sn_head) = nh; id(g_sn_add) = nh;
-                      if (id(g_sn_grow) > 0 && id(g_sn_len) < 55) { id(g_sn_grow)--; id(g_sn_len)++; id(g_sn_del) = -1; }   // cap at POOL-1: the ring needs one free slot or add/drop collide
-                      else { if (id(g_sn_grow) > 0) id(g_sn_grow)--; id(g_sn_del) = (head - id(g_sn_len) + 1 + 224) % 56; }
+                      if (id(g_sn_grow) > 0 && id(g_sn_len) < 99) { id(g_sn_grow)--; id(g_sn_len)++; id(g_sn_del) = -1; }   // cap at POOL-1: the ring needs one free slot or add/drop collide
+                      else { if (id(g_sn_grow) > 0) id(g_sn_grow)--; id(g_sn_del) = (head - id(g_sn_len) + 1 + 400) % 100; }
                     }
                   }
                 }
@@ -408,7 +408,7 @@ interval:
                   // render (constant cost): head every tick + the one added/dropped dot
                   lv_obj_set_pos(id(sn_head), 180 + (int) lroundf(id(g_sn_hx)) - 4, 180 + (int) lroundf(id(g_sn_hy)) - 4);
                   if (id(g_sn_add) >= 0 || id(g_sn_del) >= 0) {
-                    lv_obj_t *SS[56] = { id(sn_seg0), id(sn_seg1), id(sn_seg2), id(sn_seg3), id(sn_seg4), id(sn_seg5), id(sn_seg6), id(sn_seg7), id(sn_seg8), id(sn_seg9), id(sn_seg10), id(sn_seg11), id(sn_seg12), id(sn_seg13), id(sn_seg14), id(sn_seg15), id(sn_seg16), id(sn_seg17), id(sn_seg18), id(sn_seg19), id(sn_seg20), id(sn_seg21), id(sn_seg22), id(sn_seg23), id(sn_seg24), id(sn_seg25), id(sn_seg26), id(sn_seg27), id(sn_seg28), id(sn_seg29), id(sn_seg30), id(sn_seg31), id(sn_seg32), id(sn_seg33), id(sn_seg34), id(sn_seg35), id(sn_seg36), id(sn_seg37), id(sn_seg38), id(sn_seg39), id(sn_seg40), id(sn_seg41), id(sn_seg42), id(sn_seg43), id(sn_seg44), id(sn_seg45), id(sn_seg46), id(sn_seg47), id(sn_seg48), id(sn_seg49), id(sn_seg50), id(sn_seg51), id(sn_seg52), id(sn_seg53), id(sn_seg54), id(sn_seg55) };
+                    lv_obj_t *SS[100] = { id(sn_seg0), id(sn_seg1), id(sn_seg2), id(sn_seg3), id(sn_seg4), id(sn_seg5), id(sn_seg6), id(sn_seg7), id(sn_seg8), id(sn_seg9), id(sn_seg10), id(sn_seg11), id(sn_seg12), id(sn_seg13), id(sn_seg14), id(sn_seg15), id(sn_seg16), id(sn_seg17), id(sn_seg18), id(sn_seg19), id(sn_seg20), id(sn_seg21), id(sn_seg22), id(sn_seg23), id(sn_seg24), id(sn_seg25), id(sn_seg26), id(sn_seg27), id(sn_seg28), id(sn_seg29), id(sn_seg30), id(sn_seg31), id(sn_seg32), id(sn_seg33), id(sn_seg34), id(sn_seg35), id(sn_seg36), id(sn_seg37), id(sn_seg38), id(sn_seg39), id(sn_seg40), id(sn_seg41), id(sn_seg42), id(sn_seg43), id(sn_seg44), id(sn_seg45), id(sn_seg46), id(sn_seg47), id(sn_seg48), id(sn_seg49), id(sn_seg50), id(sn_seg51), id(sn_seg52), id(sn_seg53), id(sn_seg54), id(sn_seg55), id(sn_seg56), id(sn_seg57), id(sn_seg58), id(sn_seg59), id(sn_seg60), id(sn_seg61), id(sn_seg62), id(sn_seg63), id(sn_seg64), id(sn_seg65), id(sn_seg66), id(sn_seg67), id(sn_seg68), id(sn_seg69), id(sn_seg70), id(sn_seg71), id(sn_seg72), id(sn_seg73), id(sn_seg74), id(sn_seg75), id(sn_seg76), id(sn_seg77), id(sn_seg78), id(sn_seg79), id(sn_seg80), id(sn_seg81), id(sn_seg82), id(sn_seg83), id(sn_seg84), id(sn_seg85), id(sn_seg86), id(sn_seg87), id(sn_seg88), id(sn_seg89), id(sn_seg90), id(sn_seg91), id(sn_seg92), id(sn_seg93), id(sn_seg94), id(sn_seg95), id(sn_seg96), id(sn_seg97), id(sn_seg98), id(sn_seg99) };
                     if (id(g_sn_add) >= 0) lv_obj_set_pos(SS[id(g_sn_add)], 180 + (int) lroundf(id(g_sn_tx)[id(g_sn_add)]) - 4, 180 + (int) lroundf(id(g_sn_ty)[id(g_sn_add)]) - 4);
                     if (id(g_sn_del) >= 0) lv_obj_set_pos(SS[id(g_sn_del)], 400, 400);
                   }
@@ -558,6 +558,50 @@ lvgl:
         - obj: { id: sn_seg53, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
         - obj: { id: sn_seg54, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
         - obj: { id: sn_seg55, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg56, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg57, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg58, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg59, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg60, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg61, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg62, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg63, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg64, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg65, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg66, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg67, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg68, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg69, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg70, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg71, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg72, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg73, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg74, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg75, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg76, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg77, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg78, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg79, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg80, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg81, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg82, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg83, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg84, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg85, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg86, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg87, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg88, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg89, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg90, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg91, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg92, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg93, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg94, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg95, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg96, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg97, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg98, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
+        - obj: { id: sn_seg99, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0x52A049, bg_opa: COVER }
         - obj: { id: sn_head, x: 400, y: 400, width: 9, height: 9, radius: 4, border_width: 0, bg_color: 0xB8E86A, bg_opa: COVER }
         - label: { id: lbl_sn_score, align: CENTER, x: 0, y: -150, text: "0", text_font: font_med, text_color: 0xCFEAE4, hidden: true }
         - image: { id: sn_logo, align: CENTER, x: 0, y: 0, src: img_sn_logo, hidden: true }

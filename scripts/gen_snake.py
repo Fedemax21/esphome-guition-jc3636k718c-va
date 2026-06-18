@@ -17,7 +17,9 @@
 # Coords: a centre-offset (cx,cy) maps to a top-left lv_obj_set_pos of (180+cx-SEG/2, 180+cy-SEG/2).
 import os
 
-POOL = 56          # max body dots = number of body widgets
+POOL = 100         # max body dots = number of body widgets (max snake length = POOL-1).
+                   # Render is O(1) per tick (trail model), so a big pool only costs RAM (obj
+                   # widgets, allocated in PSRAM) - not per-tick time.
 SEG  = 9           # dot square (px)
 SEGR = 4           # dot corner radius
 HALF = SEG // 2    # 4
