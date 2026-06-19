@@ -23,6 +23,9 @@ and from making this device actually work.
 - Touch **CST816** (I²C). Rotary **knob** (rotation only - **not pressable**).
 - Audio out **PCM5100A** I²S DAC + speaker. Mic = I²S **PDM**.
 - **WS2812 LED ring**, 13 LEDs, GRB.
+- **Radios:** Wi-Fi 2.4 GHz b/g/n + **Bluetooth LE 5.0** (ESP32-S3 has **no Bluetooth
+  Classic / BR-EDR** → no A2DP; the speaker/mic are I²S, *not* Bluetooth audio). One
+  shared 2.4 GHz antenna for both.
 - microSD (SD_MMC). USB-C; some units have Li-ion + wireless charging.
 
 ## Pinout (authoritative)
@@ -135,6 +138,19 @@ microSD (SD_MMC):        CLK=39 CMD=38 D0=40 D1=41 D2=48 D3=47
 14. **`${substitution}` inside a flow-mapping `{ }` breaks the YAML parse.** The `}` that closes
     `${...}` is read as the end of the flow map, e.g. `image: { id: x, src: avatar${n} }` fails
     with "expected ',' or '}'". Use **block** style for any line whose value contains a `${...}`.
+
+15. **Bluetooth is BLE-only and competes hard with voice/LVGL.** The S3 has Bluetooth **LE 5.0**
+    and **no Classic** - so **no Bluetooth audio** (A2DP needs Classic; playback stays on the I²S
+    DAC). What ESPHome *can* do here is BLE: `bluetooth_proxy` (relay BLE devices to Home
+    Assistant) or `esp32_ble_tracker` (beacons / BLE sensors), optionally `esp32_improv` (BLE
+    Wi-Fi provisioning). It is **not enabled in this repo**, and it is not free: the BLE stack +
+    Wi-Fi/BLE coexistence share the single 2.4 GHz radio and CPU with `micro_wake_word`, the
+    voice pipeline and the QSPI/LVGL redraws, and the BLE stack wants **internal** RAM that is
+    already squeezed (LVGL draw buffer at 24% internal). Expect audio/display hitches, higher
+    heap pressure and possible OOM/brownouts. If you add it: prefer **passive** scanning, keep
+    active connections to a minimum (`bluetooth_proxy` raises the BLE connection slots), test heap
+    headroom (`logger` + free-heap sensor), and consider dropping heavy screens. Treat it as
+    untested on this exact build - validate on-device before relying on it.
 
 ## Architecture of this repo (for edits)
 
