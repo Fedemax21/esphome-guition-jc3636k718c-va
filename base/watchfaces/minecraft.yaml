@@ -1,8 +1,12 @@
 # ═════════════════════════════════════════════════════════════════════════════
 #  MINECRAFT watchface (optional, id 3). A blocky scene with a day/night cycle:
-#  sky + textured grass/dirt ground, the sun by day / moon + stars by night,
-#  drifting blocky clouds, pixel flowers on the grass, a blocky pixel font for the
-#  time (classic drop shadow), outdoor temp, and a Minecraft heart bar for battery.
+#  sky + textured grass/dirt ground, the sun by day / moon + stars by night, pixel
+#  flowers on the grass, a blocky pixel font for the time (classic drop shadow),
+#  outdoor temp, and a Minecraft heart bar (HUD) for the battery.
+#
+#  PERFORMANCE: the per-second tick is just a tiny lambda; the heavy redraws (the big
+#  pixel digits, the day/night swap) only run when the minute actually changes or the
+#  day/night state flips - so it stays light. No animated clouds.
 #
 #  Assets fetched via raw GitHub URLs on the BETA branch; flip /beta/ -> /main/ at merge.
 #  Watchface contract: see base/watchfaces/demo.yaml.
@@ -13,6 +17,12 @@ esphome:
     - priority: 655
       then:
         - lambda: 'id(g_wf_present)[3] = true; id(g_wf_name)[3] = "Minecraft";'
+
+globals:
+  - { id: g_mc_last_min,   type: int,  restore_value: no, initial_value: '-1' }
+  - { id: g_mc_last_night, type: int,  restore_value: no, initial_value: '-1' }
+  - { id: g_mc_upd_min,    type: bool, restore_value: no, initial_value: 'false' }
+  - { id: g_mc_upd_night,  type: bool, restore_value: no, initial_value: 'false' }
 
 font:
   - file: https://raw.githubusercontent.com/MichalZaniewicz/esphome-guition-jc3636k718c-va/beta/assets/fonts/pixel-font.ttf
@@ -28,7 +38,6 @@ image:
   - { id: img_mc_ground, file: https://raw.githubusercontent.com/MichalZaniewicz/esphome-guition-jc3636k718c-va/beta/assets/sprites/minecraft/ground.png, type: RGB565 }
   - { id: img_mc_sun,    file: https://raw.githubusercontent.com/MichalZaniewicz/esphome-guition-jc3636k718c-va/beta/assets/sprites/minecraft/sun.png,    type: RGB565, transparency: alpha_channel }
   - { id: img_mc_moon,   file: https://raw.githubusercontent.com/MichalZaniewicz/esphome-guition-jc3636k718c-va/beta/assets/sprites/minecraft/moon.png,   type: RGB565, transparency: alpha_channel }
-  - { id: img_mc_cloud,  file: https://raw.githubusercontent.com/MichalZaniewicz/esphome-guition-jc3636k718c-va/beta/assets/sprites/minecraft/cloud.png,  type: RGB565, transparency: alpha_channel }
   - { id: img_mc_flower, file: https://raw.githubusercontent.com/MichalZaniewicz/esphome-guition-jc3636k718c-va/beta/assets/sprites/minecraft/flower.png, type: RGB565, transparency: alpha_channel }
 
 lvgl:
@@ -49,9 +58,6 @@ lvgl:
         # pixel flowers standing on the grass
         - image: { id: mc_flower1, src: img_mc_flower, x: 56,  y: 200 }
         - image: { id: mc_flower2, src: img_mc_flower, x: 282, y: 206 }
-        # drifting blocky clouds (x animated in an interval)
-        - image: { id: mc_cloud1, src: img_mc_cloud, x: 60,  y: 46 }
-        - image: { id: mc_cloud2, src: img_mc_cloud, x: 230, y: 74 }
         # sun by day / moon by night (top-right)
         - image: { id: mc_sun,  src: img_mc_sun,  align: TOP_RIGHT, x: -38, y: 38 }
         - image: { id: mc_moon, src: img_mc_moon, align: TOP_RIGHT, x: -38, y: 38, hidden: true }
@@ -60,93 +66,92 @@ lvgl:
         - label: { id: mc_time_sh, align: CENTER, x: 3, y: -41, text: "00:00", text_font: mc_font_big, text_color: 0x1A2A40 }
         - label: { id: mc_time,    align: CENTER, x: 0, y: -44, text: "00:00", text_font: mc_font_big, text_color: 0xFFFFFF }
         - label: { id: mc_date,    align: CENTER, x: 0, y: 14,  text: "",      text_font: mc_font_sm,  text_color: 0xEAF2FB }
-        # battery as a Minecraft heart bar, low on the screen: 5 dark "empty" slots + red fill on top
+        # battery as a Minecraft heart bar (HUD), low: 5 dark "empty" slots + red fill on top
         - label: { id: mc_hearts_bg, align: BOTTOM_LEFT, x: 128, y: -16, text: "󰋑󰋑󰋑󰋑󰋑", text_font: icons18, text_color: 0x3A1614 }
         - label: { id: mc_hearts,    align: BOTTOM_LEFT, x: 128, y: -16, text: "",          text_font: icons18, text_color: 0xE2453F }
 
 interval:
-  - interval: 50ms
+  - interval: 50ms        # self-show when core requests the home base
     then:
       - if:
           condition: { lambda: 'return id(g_wf_req) && id(g_watchface) == 3;' }
           then:
-            - lambda: 'id(g_wf_req) = false;'
+            - lambda: 'id(g_wf_req) = false; id(g_mc_last_min) = -1; id(g_mc_last_night) = -1;'   # force a full redraw on entry
             - lvgl.page.show: { id: page_home_mc, animation: fade_in, time: 250ms }
             - script.execute: mc_render
-  - interval: 1s
+  - interval: 1s          # cheap tick - only redraws on a real change
     then:
       - if:
           condition: { lambda: 'return id(g_watchface) == 3 && id(g_base) == 0;' }
           then: [ script.execute: mc_render ]
-  - interval: 120ms        # slowly drift the clouds
-    then:
-      - if:
-          condition: { lambda: 'return id(g_watchface) == 3 && id(g_base) == 0;' }
-          then:
-            - lambda: |-
-                uint32_t m = millis(); int w = 470;
-                lv_obj_set_x(id(mc_cloud1), 360 - (int)((m / 70) % w));
-                lv_obj_set_x(id(mc_cloud2), 360 - (int)(((m / 110) + 260) % w));
 
 script:
   - id: mc_render
     then:
-      - lvgl.label.update: { id: mc_time,    text: !lambda 'return id(ha_time).now().is_valid() ? id(ha_time).now().strftime("%H:%M") : std::string("00:00");' }
-      - lvgl.label.update: { id: mc_time_sh, text: !lambda 'return id(ha_time).now().is_valid() ? id(ha_time).now().strftime("%H:%M") : std::string("00:00");' }
-      - lvgl.label.update:
-          id: mc_date
-          text: !lambda |-
-            auto t = id(ha_time).now();
-            if (!t.is_valid()) return std::string("");
-            static const char* d[8] = {"","SUN","MON","TUE","WED","THU","FRI","SAT"};
-            std::string day = (t.day_of_week >= 1 && t.day_of_week <= 7) ? std::string(d[t.day_of_week]) : std::string("");
-            std::string s = day + t.strftime(" %d %b");
-            for (auto &c : s) { if (c >= 'a' && c <= 'z') c -= 32; }
-            return s;
-      # Day / night cycle (night 20:00-06:00): sky tint, sun<->moon, stars, clouds, temp colour
+      # Decide what actually changed (so the second-by-second tick is nearly free)
+      - lambda: |-
+          id(g_mc_upd_min) = false; id(g_mc_upd_night) = false;
+          auto t = id(ha_time).now();
+          if (!t.is_valid()) return;
+          int mn = t.hour * 60 + t.minute;
+          if (mn != id(g_mc_last_min)) { id(g_mc_last_min) = mn; id(g_mc_upd_min) = true; }
+          int night = (t.hour < 6 || t.hour >= 20) ? 1 : 0;
+          if (night != id(g_mc_last_night)) { id(g_mc_last_night) = night; id(g_mc_upd_night) = true; }
+      # Minute changed -> redraw time / date / temp / hearts
       - if:
-          condition: { lambda: 'auto t = id(ha_time).now(); int h = t.is_valid() ? t.hour : 12; return (h < 6 || h >= 20);' }
+          condition: { lambda: 'return id(g_mc_upd_min);' }
           then:
-            - lvgl.widget.update: { id: mc_sky, bg_color: 0x101A33 }
-            - lvgl.widget.hide: mc_sun
-            - lvgl.widget.show: mc_moon
-            - lvgl.widget.hide: mc_cloud1
-            - lvgl.widget.hide: mc_cloud2
-            - lvgl.widget.show: mc_star1
-            - lvgl.widget.show: mc_star2
-            - lvgl.widget.show: mc_star3
-            - lvgl.widget.show: mc_star4
-            - lvgl.widget.show: mc_star5
-            - lvgl.label.update: { id: mc_sun_temp, text_color: 0xC8D2E2 }
-          else:
-            - lvgl.widget.update: { id: mc_sky, bg_color: 0x5A9BD4 }
-            - lvgl.widget.show: mc_sun
-            - lvgl.widget.hide: mc_moon
-            - lvgl.widget.show: mc_cloud1
-            - lvgl.widget.show: mc_cloud2
-            - lvgl.widget.hide: mc_star1
-            - lvgl.widget.hide: mc_star2
-            - lvgl.widget.hide: mc_star3
-            - lvgl.widget.hide: mc_star4
-            - lvgl.widget.hide: mc_star5
-            - lvgl.label.update: { id: mc_sun_temp, text_color: 0x16314A }
-      # Outdoor temp obeys the Show-weather toggle
-      - if:
-          condition: { lambda: 'return id(g_show_weather);' }
-          then:
-            - lvgl.widget.show: mc_sun_temp
+            - lvgl.label.update: { id: mc_time,    text: !lambda 'return id(ha_time).now().strftime("%H:%M");' }
+            - lvgl.label.update: { id: mc_time_sh, text: !lambda 'return id(ha_time).now().strftime("%H:%M");' }
             - lvgl.label.update:
-                id: mc_sun_temp
+                id: mc_date
                 text: !lambda |-
-                  if (!id(wx_temp).has_state()) return std::string("--°");
-                  char b[10]; snprintf(b, sizeof(b), "%d°", (int) roundf(id(wx_temp).state)); return std::string(b);
-          else:
-            - lvgl.widget.hide: mc_sun_temp
-      # Battery -> heart bar (5 hearts, each ~20%)
-      - lvgl.label.update:
-          id: mc_hearts
-          text: !lambda |-
-            int p = id(g_batt);
-            int n = (p < 0) ? 5 : (p + 10) / 20; if (n < 0) n = 0; if (n > 5) n = 5;
-            std::string s; for (int i = 0; i < n; i++) s += "󰋑";
-            return s;
+                  auto t = id(ha_time).now();
+                  static const char* d[8] = {"","SUN","MON","TUE","WED","THU","FRI","SAT"};
+                  std::string day = (t.day_of_week >= 1 && t.day_of_week <= 7) ? std::string(d[t.day_of_week]) : std::string("");
+                  std::string s = day + t.strftime(" %d %b");
+                  for (auto &c : s) { if (c >= 'a' && c <= 'z') c -= 32; }
+                  return s;
+            - if:
+                condition: { lambda: 'return id(g_show_weather);' }
+                then:
+                  - lvgl.widget.show: mc_sun_temp
+                  - lvgl.label.update:
+                      id: mc_sun_temp
+                      text: !lambda |-
+                        if (!id(wx_temp).has_state()) return std::string("--°");
+                        char b[10]; snprintf(b, sizeof(b), "%d°", (int) roundf(id(wx_temp).state)); return std::string(b);
+                else: [ lvgl.widget.hide: mc_sun_temp ]
+            - lvgl.label.update:
+                id: mc_hearts
+                text: !lambda |-
+                  int p = id(g_batt);
+                  int n = (p < 0) ? 5 : (p + 10) / 20; if (n < 0) n = 0; if (n > 5) n = 5;
+                  std::string s; for (int i = 0; i < n; i++) s += "󰋑";
+                  return s;
+      # Day/night flipped -> swap sky tint, sun<->moon, stars, temp colour
+      - if:
+          condition: { lambda: 'return id(g_mc_upd_night);' }
+          then:
+            - if:
+                condition: { lambda: 'return id(g_mc_last_night) == 1;' }
+                then:
+                  - lvgl.widget.update: { id: mc_sky, bg_color: 0x101A33 }
+                  - lvgl.widget.hide: mc_sun
+                  - lvgl.widget.show: mc_moon
+                  - lvgl.widget.show: mc_star1
+                  - lvgl.widget.show: mc_star2
+                  - lvgl.widget.show: mc_star3
+                  - lvgl.widget.show: mc_star4
+                  - lvgl.widget.show: mc_star5
+                  - lvgl.label.update: { id: mc_sun_temp, text_color: 0xC8D2E2 }
+                else:
+                  - lvgl.widget.update: { id: mc_sky, bg_color: 0x5A9BD4 }
+                  - lvgl.widget.show: mc_sun
+                  - lvgl.widget.hide: mc_moon
+                  - lvgl.widget.hide: mc_star1
+                  - lvgl.widget.hide: mc_star2
+                  - lvgl.widget.hide: mc_star3
+                  - lvgl.widget.hide: mc_star4
+                  - lvgl.widget.hide: mc_star5
+                  - lvgl.label.update: { id: mc_sun_temp, text_color: 0x16314A }
