@@ -3,6 +3,16 @@
 All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.2.2] - 2026-06-19
+
+### Changed
+- Timer screen redesigned: colour-coded depleting ring (green → amber → red) with a head-dot, SET / RUNNING / PAUSED status, and tile-styled buttons with a soft glow.
+- Alarm screen redesigned: red scrim, a big pulsing bell, "TIME'S UP!" and a tap-to-stop hint.
+
+### Fixed
+- Returning to the home screen after music stops/pauses keeps the selected watchface (was forced to Classic).
+- The Minecraft watchface now shows the active-timer badge.
+
 ## [2.2.1] - 2026-06-19
 
 ### Added

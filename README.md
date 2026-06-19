@@ -47,7 +47,7 @@ Everything is navigated with **swipes + taps on the screen** and the **rotary kn
 | <img src="assets/screens/weather.png" width="170"> | **Weather**<br>A 7-day dial; turn the knob to scroll days. Animated condition icon, colour-coded temperature, and a glow that slides to the selected day. |
 | <img src="assets/screens/thermostat.png" width="170"> | **Thermostat**<br>A dial for a `climate.*` entity; the knob sets the target, tap toggles on/off. Accent colour follows heating / cooling / idle. |
 | <img src="assets/screens/sensors.png" width="170"> | **Sensors**<br>A glance of 1-6 configurable Home Assistant entities, shown big one at a time; turn the knob to cycle (dots show the position). Any entity, pulled straight from HA. |
-| <img src="assets/screens/timer.png" width="170"> | **Timer**<br>Set by knob or voice; big countdown with a depleting ring, pause/stop, and an alarm when it finishes. |
+| <img src="assets/screens/timer.png" width="170"> | **Timer**<br>Set by knob or voice; big countdown with a colour-coded depleting ring (green → amber → red) and a head-dot, SET / RUNNING / PAUSED status, pause/stop, and a fancy alarm screen when it finishes. |
 | <img src="assets/screens/cool-cars.png" width="170"> | **Cool Cars**<br>A lane-racing arcade game - the knob steers, dodge traffic and grab coins. |
 | <img src="assets/screens/space-wars.png" width="170"> | **Space Wars**<br>A vertical space shooter - the knob steers, auto-fire, survive the waves. |
 | <img src="assets/screens/snake.png" width="170"> | **Snake 360**<br>A smooth-steering 360-degree snake - turn the knob to steer the head and the body trails behind, across the whole round screen. |
