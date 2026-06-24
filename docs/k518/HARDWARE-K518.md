@@ -91,6 +91,29 @@ są pin-agnostyczne i przechodzą bez zmian (poza ewentualnymi odwołaniami do r
 - `ST77916_init_V1.0.INI` - oficjalna sekwencja inicjalizacji ekranu.
 - `JC3636K518_Instructions-EN.pdf` - instrukcja producenta.
 
+## Stan portu (gałąź k518-alpha)
+
+Zrobione w `base/core-k518.yaml` (fork `base/core.yaml`):
+- przepięte wszystkie piny wg tabeli (display, touch, knob, DAC, mic, bateria, backlight);
+- usunięty `light: ring_light` i jego efekty; skrypt `ring_update` wypatroszony do no-op
+  (pozostałe `script.execute: ring_update` nadal się rozwiązują);
+- usunięte wywołania ringu z boot-splasha;
+- zamiast mute DAC dodany `switch: i2s_switch` na GPIO0 (przełącznik CH445P), `ALWAYS_ON`;
+- te same `id:` co w core K718, więc `base/screens/*` i `base/watchfaces/*` działają bez zmian.
+
+Cienki config do wgrania: **`guition-va-k518.yaml`** (ciągnie `base/core-k518.yaml`
+z gałęzi `k518-alpha`).
+
+Do potwierdzenia/poprawienia na żywo:
+- **audio**: polaryzacja `i2s_switch` (GPIO0) - brak dźwięku => odwróć `restore_mode` lub pin;
+- **knob**: kierunek (płytka może być prawdziwą kwadraturą - patrz komentarz w `binary_sensor`);
+- **bateria**: mnożnik w lambdzie liczenia napięcia (K518 ma dzielnik ~200k/100k => x3, nie x2);
+- **mute DAC (XSMT)**: założenie, że jest stały - sprawdzić, czy nie trzeba sterować.
+
+Znane ograniczenie: ekran `base/screens/demo.yaml` steruje ringiem (`ring_light`),
+więc jest **wyłączony** w `guition-va-k518.yaml`. Włączyć dopiero po uwarunkowaniu
+odwołań do ringu w `demo.yaml`.
+
 > Status: **niezweryfikowane na żywo.** Nie mamy płytki K518 do testów; piny
 > pochodzą ze schematu, ale audio przez CH445P i kierunek knoba wymagają
 > potwierdzenia na sprzęcie.
