@@ -637,7 +637,7 @@ globals:
   - id: g_set_min      # default timer minutes (after restart); the knob changes it
     type: int
     restore_value: no
-    initial_value: '60'
+    initial_value: '5'
   - id: g_timer_secs   # remaining seconds (display + local countdown)
     type: int
     restore_value: no
@@ -2176,7 +2176,7 @@ touchscreen:
               condition: { lambda: 'return id(g_gesture) == 0;' }
               then:
                 - lambda: |-
-                    id(g_bright)=100; id(g_night)=false; id(g_show_weather)=false; id(g_show_climate)=false; id(g_watchface)=0; id(g_ww_on)=true; id(g_set_min)=60; id(g_beep_ww)=true; id(g_hold_talk)=true; id(g_night_from)=22; id(g_night_to)=7; id(g_blank_idx)=0; id(g_factory_reset)=true;
+                    id(g_bright)=100; id(g_night)=false; id(g_show_weather)=false; id(g_show_climate)=false; id(g_watchface)=0; id(g_ww_on)=true; id(g_set_min)=5; id(g_beep_ww)=true; id(g_hold_talk)=true; id(g_night_from)=22; id(g_night_to)=7; id(g_blank_idx)=0; id(g_factory_reset)=true;
                 - button.press: btn_restart
           - if: { condition: { lambda: 'return id(g_gesture) == 3 || id(g_gesture) == 1;' }, then: [ lambda: 'id(g_mode) = 15;', script.execute: ui_render ] }
     # === INFO (7) === any gesture = return to the settings list
