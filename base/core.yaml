@@ -27,6 +27,8 @@ substitutions:
   room_temp_entity: sensor.room_temperature
   room_hum_entity: sensor.room_humidity
   climate_entity: climate.home   # thermostat screen target (a climate.* entity)
+  climate_entity_2: climate.home2   # 2nd thermostat screen target (optional 2nd climate.* entity)
+  climate_entity_3: climate.home3   # 3rd thermostat screen target (optional 3rd climate.* entity)
   # Control tiles (swipe up): 4 toggleable HA entities, each with an icon + a name. Any domain.
   # tileN_icon = a name from the built-in set: bulb lamp led power plug switch fan ac heater
   # thermometer lock unlock door blinds tv speaker bell wifi home flash. The same icon may
@@ -158,6 +160,8 @@ esphome:
               else if (tok == "sensors") id = 8;
               else if (tok == "snake") id = 9;
               else if (tok == "gyruss" || tok == "knobuss") id = 10;
+              else if (tok == "thermostat2") id = 11;
+              else if (tok == "thermostat3") id = 12;
               if (id >= 0 && id < 16 && id(g_present)[id]) id(g_order)[id(g_order_n)++] = id;
               if (comma == std::string::npos) break;
               pos = comma + 1;
