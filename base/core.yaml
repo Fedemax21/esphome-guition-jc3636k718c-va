@@ -1039,42 +1039,34 @@ script:
           condition: { lambda: 'return id(g_ctl_sel) == 0;' }
           then:
             - homeassistant.action:
-                action: light.turn_on
+                action: script.set_light_hue
                 data:
                   entity_id: "${tile1_entity}"
-                  hs_color:
-                    - !lambda 'return (int) id(g_ctl_hue)[0];'
-                    - 100
+                  hue: !lambda 'return std::to_string((int) id(g_ctl_hue)[0]);'
       - if:
           condition: { lambda: 'return id(g_ctl_sel) == 1;' }
           then:
             - homeassistant.action:
-                action: light.turn_on
+                action: script.set_light_hue
                 data:
                   entity_id: "${tile2_entity}"
-                  hs_color:
-                    - !lambda 'return (int) id(g_ctl_hue)[1];'
-                    - 100
+                  hue: !lambda 'return std::to_string((int) id(g_ctl_hue)[1]);'
       - if:
           condition: { lambda: 'return id(g_ctl_sel) == 2;' }
           then:
             - homeassistant.action:
-                action: light.turn_on
+                action: script.set_light_hue
                 data:
                   entity_id: "${tile3_entity}"
-                  hs_color:
-                    - !lambda 'return (int) id(g_ctl_hue)[2];'
-                    - 100
+                  hue: !lambda 'return std::to_string((int) id(g_ctl_hue)[2]);'
       - if:
           condition: { lambda: 'return id(g_ctl_sel) == 3;' }
           then:
             - homeassistant.action:
-                action: light.turn_on
+                action: script.set_light_hue
                 data:
                   entity_id: "${tile4_entity}"
-                  hs_color:
-                    - !lambda 'return (int) id(g_ctl_hue)[3];'
-                    - 100
+                  hue: !lambda 'return std::to_string((int) id(g_ctl_hue)[3]);'
       - lambda: 'id(g_ctl_pending) = false;'
   # Assistant overlay (dim + frame + text) - always on top
   - id: va_show
