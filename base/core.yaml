@@ -27,8 +27,11 @@ substitutions:
   room_temp_entity: sensor.room_temperature
   room_hum_entity: sensor.room_humidity
   climate_entity: climate.home   # thermostat screen target (a climate.* entity)
+  climate_name: "Living"            # label shown at the top of the thermostat dial
   climate_entity_2: climate.home2   # 2nd thermostat screen target (optional 2nd climate.* entity)
+  climate_name_2: "Room 2"
   climate_entity_3: climate.home3   # 3rd thermostat screen target (optional 3rd climate.* entity)
+  climate_name_3: "Room 3"
   # Control tiles (swipe up): 4 toggleable HA entities, each with an icon + a name. Any domain.
   # tileN_icon = a name from the built-in set: bulb lamp led power plug switch fan ac heater
   # thermometer lock unlock door blinds tv speaker bell wifi home flash. The same icon may
@@ -2642,9 +2645,7 @@ interval:
                 id: lbl_date
                 text: !lambda |-
                   auto t = id(ha_time).now();
-                  static const char* d[8] = {"","Su","Mo","Tu","We","Th","Fr","Sa"};
-                  std::string day = (t.day_of_week >= 1 && t.day_of_week <= 7) ? std::string(d[t.day_of_week]) : std::string("");
-                  return t.strftime("%d.%m") + "  " + day;
+                  return t.strftime("%d.%m") + "  Flor";
       # Screen-timer countdown (g_timer_active). From the button: local. From VA: HA calls finished, locally smooth.
       - if:
           condition:

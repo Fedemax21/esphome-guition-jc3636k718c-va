@@ -292,6 +292,7 @@ lvgl:
             shadow_opa: 55%
             clickable: false
             scrollable: false
+        - label: { id: th2_name, align: CENTER, y: -112, text: "${climate_name_2}", text_font: font_artist, text_color: 0x6F9A92 }
         - label: { id: th2_action, align: CENTER, y: -86, text: "", text_font: font_artist, text_color: 0x9FC7BE }
         - label: { id: th2_target, align: CENTER, y: -14, text: "--", text_font: montserrat_48, text_color: 0xFFFFFF }
         - label: { id: th2_cur, align: CENTER, y: 30, text: "now --", text_font: font_med, text_color: 0x9FC7BE }
