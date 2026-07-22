@@ -829,6 +829,17 @@ globals:
   - id: g_present        # which screens registered (by base id); carousel is built from screen_order
     type: bool[16]
     restore_value: no
+  - id: g_ctl_sel        # selected CONTROLS tile (-1 = none, 0-3) - knob edits its hue while selected
+    type: int
+    restore_value: no
+    initial_value: '-1'
+  - id: g_ctl_hue        # per-tile hue (0-359), local edit buffer; committed to HA debounced
+    type: float[4]
+    restore_value: no
+  - id: g_ctl_pending    # true = a hue edit hasn't been sent to HA yet
+    type: bool
+    restore_value: no
+    initial_value: 'false'
   - id: g_tap_seq        # bumped on every normal-mode tap; screens watch it to react (shared infra)
     type: int
     restore_value: no
@@ -996,6 +1007,75 @@ script:
       - lvgl.widget.hide: vol_arc
       - lvgl.widget.hide: vol_label
       - lambda: 'id(g_vol_shown) = false;'
+  # CONTROLS tile selection/hue: redraws the 4 tile borders - selected tile's border shows its
+  # live (uncommitted) hue at full colour, the rest stay at the default dim border.
+  - id: ctl_render
+    then:
+      - lambda: |-
+          auto hue2rgb = [](float h) -> uint32_t {
+            float c = 1.0f, x = 1.0f - fabsf(fmodf(h / 60.0f, 2.0f) - 1.0f);
+            float r=0, g=0, b=0;
+            if (h < 60) { r=c; g=x; b=0; }
+            else if (h < 120) { r=x; g=c; b=0; }
+            else if (h < 180) { r=0; g=c; b=x; }
+            else if (h < 240) { r=0; g=x; b=c; }
+            else if (h < 300) { r=x; g=0; b=c; }
+            else { r=c; g=0; b=x; }
+            return ((uint32_t)(r*255)<<16) | ((uint32_t)(g*255)<<8) | (uint32_t)(b*255);
+          };
+          lv_obj_t* tiles[4] = { id(tile1), id(tile2), id(tile3), id(tile4) };
+          for (int i = 0; i < 4; i++) {
+            bool sel = (id(g_ctl_sel) == i);
+            uint32_t col = sel ? hue2rgb(id(g_ctl_hue)[i]) : 0x2A303CU;
+            lv_obj_set_style_border_color(tiles[i], lv_color_hex(col), LV_PART_MAIN);
+            lv_obj_set_style_border_width(tiles[i], sel ? 4 : 2, LV_PART_MAIN);
+          }
+  # CONTROLS tile hue: sends the selected tile's edited hue to HA, ~500ms after the last knob tick.
+  - id: ctl_commit
+    mode: restart
+    then:
+      - delay: 500ms
+      - if:
+          condition: { lambda: 'return id(g_ctl_sel) == 0;' }
+          then:
+            - homeassistant.action:
+                action: light.turn_on
+                data:
+                  entity_id: "${tile1_entity}"
+                  hs_color:
+                    - !lambda 'return (int) id(g_ctl_hue)[0];'
+                    - 100
+      - if:
+          condition: { lambda: 'return id(g_ctl_sel) == 1;' }
+          then:
+            - homeassistant.action:
+                action: light.turn_on
+                data:
+                  entity_id: "${tile2_entity}"
+                  hs_color:
+                    - !lambda 'return (int) id(g_ctl_hue)[1];'
+                    - 100
+      - if:
+          condition: { lambda: 'return id(g_ctl_sel) == 2;' }
+          then:
+            - homeassistant.action:
+                action: light.turn_on
+                data:
+                  entity_id: "${tile3_entity}"
+                  hs_color:
+                    - !lambda 'return (int) id(g_ctl_hue)[2];'
+                    - 100
+      - if:
+          condition: { lambda: 'return id(g_ctl_sel) == 3;' }
+          then:
+            - homeassistant.action:
+                action: light.turn_on
+                data:
+                  entity_id: "${tile4_entity}"
+                  hs_color:
+                    - !lambda 'return (int) id(g_ctl_hue)[3];'
+                    - 100
+      - lambda: 'id(g_ctl_pending) = false;'
   # Assistant overlay (dim + frame + text) - always on top
   - id: va_show
     then:
@@ -1604,10 +1684,25 @@ binary_sensor:
                                           - script.execute: face_apply
                                           - script.execute: facepick_render
                                         else:
-                                          - media_player.volume_down:
-                                              id: media_player_speaker
-                                          - script.execute: flash_volume
-                                          - script.execute: ring_vol_flash
+                                          - if:   # volume only makes sense on the timer screen (alarm level)
+                                              condition: { lambda: 'return id(g_base) == 2;' }
+                                              then:
+                                                - media_player.volume_down:
+                                                    id: media_player_speaker
+                                                - script.execute: flash_volume
+                                                - script.execute: ring_vol_flash
+                                              else:
+                                                - if:   # CONTROLS: a tile is selected -> knob edits its hue
+                                                    condition: { lambda: 'return id(g_mode) == 10 && id(g_ctl_sel) >= 0;' }
+                                                    then:
+                                                      - lambda: |-
+                                                          int s = id(g_ctl_sel);
+                                                          float h = id(g_ctl_hue)[s] - 6.0f;
+                                                          if (h < 0) h += 360.0f;
+                                                          id(g_ctl_hue)[s] = h;
+                                                          id(g_ctl_pending) = true;
+                                                      - script.execute: ctl_render
+                                                      - script.execute: ctl_commit
   - platform: gpio
     name: "Knob right"
     id: knob_right
@@ -1673,10 +1768,25 @@ binary_sensor:
                                           - script.execute: face_apply
                                           - script.execute: facepick_render
                                         else:
-                                          - media_player.volume_up:
-                                              id: media_player_speaker
-                                          - script.execute: flash_volume
-                                          - script.execute: ring_vol_flash
+                                          - if:   # volume only makes sense on the timer screen (alarm level)
+                                              condition: { lambda: 'return id(g_base) == 2;' }
+                                              then:
+                                                - media_player.volume_up:
+                                                    id: media_player_speaker
+                                                - script.execute: flash_volume
+                                                - script.execute: ring_vol_flash
+                                              else:
+                                                - if:   # CONTROLS: a tile is selected -> knob edits its hue
+                                                    condition: { lambda: 'return id(g_mode) == 10 && id(g_ctl_sel) >= 0;' }
+                                                    then:
+                                                      - lambda: |-
+                                                          int s = id(g_ctl_sel);
+                                                          float h = id(g_ctl_hue)[s] + 6.0f;
+                                                          if (h >= 360.0f) h -= 360.0f;
+                                                          id(g_ctl_hue)[s] = h;
+                                                          id(g_ctl_pending) = true;
+                                                      - script.execute: ctl_render
+                                                      - script.execute: ctl_commit
 
 ###############################################################################
 # DISPLAY (QSPI ST77916) + BACKLIGHT + TOUCH (CST816)
@@ -1877,8 +1987,9 @@ touchscreen:
               condition:
                 lambda: 'return id(g_gesture) == 4;'
               then:
-                - lambda: 'id(g_mode) = 10;'
+                - lambda: 'id(g_mode) = 10; id(g_ctl_sel) = -1;'
                 - script.execute: ui_render
+                - script.execute: ctl_render
           - if:   # swipe down -> settings (list)
               condition:
                 lambda: 'return id(g_gesture) == 5;'
@@ -1979,8 +2090,9 @@ touchscreen:
               then:
                 - lambda: 'id(g_exit_anim) = 1; id(g_mode) = 0;'
                 - script.execute: ui_render
-          - if:   # back (right / hold) -> close "to the right"
-              condition: { lambda: 'return id(g_gesture) == 1 || id(g_gesture) == 3;' }
+          - if:   # back (right swipe) -> close "to the right". NOTE: hold is NOT back here -
+                  # hold on a tile toggles it (see the tile buttons' on_long_press).
+              condition: { lambda: 'return id(g_gesture) == 3;' }
               then:
                 - lambda: 'id(g_exit_anim) = 0; id(g_mode) = 0;'
                 - script.execute: ui_render
@@ -3400,6 +3512,9 @@ lvgl:
             shadow_spread: 1
             shadow_opa: 0%
             on_click:
+              - lambda: 'id(g_ctl_sel) = 0;'
+              - script.execute: ctl_render
+            on_long_press:
               - homeassistant.action: { action: homeassistant.toggle, data: { entity_id: "${tile1_entity}" } }
             widgets:
               - label: { id: tile1_ic, align: CENTER, y: -16, text: "", text_font: icons34, text_color: 0x707A8A }
@@ -3421,6 +3536,9 @@ lvgl:
             shadow_spread: 1
             shadow_opa: 0%
             on_click:
+              - lambda: 'id(g_ctl_sel) = 1;'
+              - script.execute: ctl_render
+            on_long_press:
               - homeassistant.action: { action: homeassistant.toggle, data: { entity_id: "${tile2_entity}" } }
             widgets:
               - label: { id: tile2_ic, align: CENTER, y: -16, text: "", text_font: icons34, text_color: 0x707A8A }
@@ -3442,6 +3560,9 @@ lvgl:
             shadow_spread: 1
             shadow_opa: 0%
             on_click:
+              - lambda: 'id(g_ctl_sel) = 2;'
+              - script.execute: ctl_render
+            on_long_press:
               - homeassistant.action: { action: homeassistant.toggle, data: { entity_id: "${tile3_entity}" } }
             widgets:
               - label: { id: tile3_ic, align: CENTER, y: -16, text: "", text_font: icons34, text_color: 0x707A8A }
@@ -3463,6 +3584,9 @@ lvgl:
             shadow_spread: 1
             shadow_opa: 0%
             on_click:
+              - lambda: 'id(g_ctl_sel) = 3;'
+              - script.execute: ctl_render
+            on_long_press:
               - homeassistant.action: { action: homeassistant.toggle, data: { entity_id: "${tile4_entity}" } }
             widgets:
               - label: { id: tile4_ic, align: CENTER, y: -16, text: "", text_font: icons34, text_color: 0x707A8A }
