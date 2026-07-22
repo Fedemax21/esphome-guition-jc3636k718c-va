@@ -493,9 +493,8 @@ interval:
           then:
             - lambda: |-
                 id(g_wx_day) += id(g_knob_delta); id(g_knob_delta) = 0;
-                int mx = (id(g_wx_n) > 0) ? id(g_wx_n) - 1 : 0;
-                if (id(g_wx_day) < 0) id(g_wx_day) = 0;
-                if (id(g_wx_day) > mx) id(g_wx_day) = mx;
+                int n = (id(g_wx_n) > 0) ? id(g_wx_n) : 1;
+                id(g_wx_day) = ((id(g_wx_day) % n) + n) % n;   // wrap around both directions
             - script.execute: wx_render
   - interval: 30ms
     then:
