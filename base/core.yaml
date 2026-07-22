@@ -2645,7 +2645,9 @@ interval:
                 id: lbl_date
                 text: !lambda |-
                   auto t = id(ha_time).now();
-                  return t.strftime("%d.%m") + "  Flor";
+                  static const char* d[8] = {"","Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"};
+                  std::string day = (t.day_of_week >= 1 && t.day_of_week <= 7) ? std::string(d[t.day_of_week]) : std::string("");
+                  return t.strftime("%d.%m") + "  " + day;
       # Screen-timer countdown (g_timer_active). From the button: local. From VA: HA calls finished, locally smooth.
       - if:
           condition:
